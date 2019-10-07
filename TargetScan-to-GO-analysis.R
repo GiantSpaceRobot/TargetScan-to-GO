@@ -21,6 +21,9 @@
 #install.packages("ggplot2")
 library("enrichR")
 library("ggplot2")
+library("DOSE")
+library("enrichplot")
+library("clusterProfiler")
 #library("gridExtra")
 
 ### Use command line arguments
@@ -168,4 +171,20 @@ df.to.plot(df22.TargetScan, "TargetScan microRNA 2017")
 df.to.plot(df23.WikiPathways, "WikiPathways 2019 Human")
 df.to.plot(df24.KEGG, "KEGG 2019 Human")
 dev.off()
+
+### Network plot generation
+target.genes <- as.character(my.input$Target.gene)
+symbols <- mapIds(org.Hs.eg.db, keys = target.genes, keytype = "SYMBOL", column="ENTREZID")
+symbols.na.omit <- na.omit(symbols)
+edo <- enrichKEGG(symbols.na.omit, pvalueCutoff = 0.05, qvalueCutoff = 0.05)
+#barplot(edo)
+edox <- setReadable(edo, 'org.Hs.eg.db', 'ENTREZID')
+pdf(file = paste0(my.output, "_Network.pdf"))
+cnetplot(edox, 
+         circular = F, 
+         foldChange=NULL, 
+         showCategory = 5, 
+         colorEdge = T)
+dev.off()
+
 
